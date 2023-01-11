@@ -13,7 +13,7 @@ app.use(cors());
 app.use("/posts", postRoutes);
 
 const CONNECTION_URL =
-  "mongodb+srv://harhat:12341234@cluster0.vxlqvgg.mongodb.net/?retryWrites=true&w=majority";
+  "mongodb+srv://harfat:12341234@cluster0.vxlqvgg.mongodb.net/?retryWrites=true&w=majority";
 const PORT = process.env.PORT || 4000;
 
 mongoose

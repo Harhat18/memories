@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { TextField, Button, Typography, Paper } from "@material-ui/core";
 import { useSelector } from "react-redux";
 import FileBase from "react-file-base64";
-
+import { useDispatch } from "react-redux";
 import useStyles from "./styles";
-// import { createPost, updatePost } from "../../actions/posts";
+import { createPost } from "../../actions/posts";
 
 const Form = ({ currentId, setCurrentId }) => {
   const [postData, setPostData] = useState({
@@ -17,7 +17,7 @@ const Form = ({ currentId, setCurrentId }) => {
   const post = useSelector((state) =>
     currentId ? state.posts.find((message) => message._id === currentId) : null
   );
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const classes = useStyles();
 
   useEffect(() => {
@@ -36,14 +36,9 @@ const Form = ({ currentId, setCurrentId }) => {
   };
 
   const handleSubmit = async (e) => {
-    // e.preventDefault();
-    // if (currentId === 0) {
-    //   dispatch(createPost(postData));
-    //   clear();
-    // } else {
-    //   dispatch(updatePost(currentId, postData));
-    //   clear();
-    // }
+    e.preventDefault();
+
+    dispatch(createPost(postData));
   };
 
   return (
