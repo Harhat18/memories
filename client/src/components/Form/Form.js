@@ -70,6 +70,7 @@ function Form() {
             }
           ></FileBase>
         </div>
+        <Button className={classes.buttonSubmit}></Button>
       </Form>
     </Paper>
   );
