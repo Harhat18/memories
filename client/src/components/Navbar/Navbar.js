@@ -18,7 +18,7 @@ const Navbar = () => {
         >
           Memories
         </Typography>
-        <img className={classes.image} src={memories} alt="icon" height="60" />ß
+        <img className={classes.image} src={memories} alt="icon" height="60" />
       </div>
       <Toolbar className={classes.toolbar}>
         {user ? (
