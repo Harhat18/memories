@@ -1,24 +1,30 @@
-import React from "react";
-import { Container } from "@material-ui/core";
-
-import Navbar from "./components/Navbar/Navbar";
-import Home from "./components/Home/Home";
-import Auth from "./components/Auth/Auth";
-
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+// import useStyle from './styles';
+import Home from './components/Home/Home.js';
+import Auth from './components/Auth/Auth.js';
+import SharedLayout from './Routes/SharedLayout.js';
+import Error from './Routes/Error.js';
+import PostDetails from './components/postDetails/PostDetails.js';
 const App = () => {
+  const user = localStorage.getItem('profile');
+
   return (
     <BrowserRouter>
-      <Container maxWidth="lg">
-        <Navbar />
-        <Routes>
-          <Route path="/" exact element={<Home />}></Route>
-          <Route path="/auth" exact element={<Auth />}></Route>
-        </Routes>
-      </Container>
+      <Routes>
+        <Route path='/' element={<SharedLayout />}>
+          <Route index element={<Navigate to={'/memories'} />} />
+          <Route path='memories' element={<Home />} />
+          <Route path='memories/search' element={<Home />} />
+          <Route path='memories/:id' element={<PostDetails />} />
+          <Route
+            path='auth'
+            element={user ? <Navigate to={'/'} /> : <Auth />}
+          />
+          <Route path='*' element={<Error />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 };
-
 export default App;

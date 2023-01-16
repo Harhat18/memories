@@ -10,6 +10,9 @@ export default makeStyles({
   border: {
     border: 'solid',
   },
+  creator: {
+    textTransform: 'capitalize',
+  },
   fullHeightCard: {
     height: '100%',
   },
