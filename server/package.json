@@ -1,23 +1,25 @@
 {
-  "name": "mern-stack-api",
+  "name": "server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "node app.js"
   },
-  "author": "harun hatin <harunhatib18@gmail.com>",
+  "author": "Abdulkabir Sultan",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.19.0",
+    "axios": "^0.27.2",
+    "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2",
-    "mongoose": "^5.9.29",
-    "morgan": "^1.10.0"
-  },
-  "devDependencies": {
-    "@types/mongoose": "^5.11.97"
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "express-async-errors": "^3.1.1",
+    "helmet": "^5.1.1",
+    "http-status-codes": "^2.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.5.2",
+    "xss-clean": "^0.1.1"
   }
 }

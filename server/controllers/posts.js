@@ -1,91 +1,100 @@
-import express from "express";
-import mongoose from "mongoose";
-import PostMessage from "../models/postMessage.js";
-
-const router = express.Router();
-
+import { NotFoundError } from '../errors/CustomError.js';
+import Posts from '../models/Post.js';
 export const getPosts = async (req, res) => {
-  try {
-    const postMessages = await PostMessage.find();
+  const { page } = req.query;
+  const limit = 8;
+  const startIndex = (Number(page) - 1) * limit;
+  const total = await Posts.countDocuments();
 
-    res.status(200).json(postMessages);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
-  }
+  const post = await Posts.find({}).sort('-_id').limit(limit).skip(startIndex);
+  res.status(200).json({
+    data: post,
+    currentPage: Number(page),
+    numberOfPages: Math.ceil(total / limit),
+  });
 };
 
 export const getPost = async (req, res) => {
   const { id } = req.params;
-
-  try {
-    const post = await PostMessage.findById(id);
-
-    res.status(200).json(post);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
-  }
+  const post = await Posts.findById(id);
+  res.status(200).json(post);
 };
 
 export const createPost = async (req, res) => {
-  const { title, message, selectedFile, creator, tags } = req.body;
+  const { username, userId } = req.user;
+  req.body = { ...req.body, creator: username, createdBy: userId };
 
-  const newPostMessage = new PostMessage({
-    title,
-    message,
-    selectedFile,
-    creator,
-    tags,
-  });
-
-  try {
-    await newPostMessage.save();
-
-    res.status(201).json(newPostMessage);
-  } catch (error) {
-    res.status(409).json({ message: error.message });
-  }
+  const post = await Posts.create(req.body);
+  res.status(201).json(post);
 };
 
 export const updatePost = async (req, res) => {
   const { id } = req.params;
-  const { title, message, creator, selectedFile, tags } = req.body;
+  const post = await Posts.findByIdAndUpdate(id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  if (!post) {
+    throw new NotFoundError(`no post match id ${id}`);
+  }
 
-  if (!mongoose.Types.ObjectId.isValid(id))
-    return res.status(404).send(`No post with id: ${id}`);
-
-  const updatedPost = { creator, title, message, tags, selectedFile, _id: id };
-
-  await PostMessage.findByIdAndUpdate(id, updatedPost, { new: true });
-
-  res.json(updatedPost);
+  res.status(201).json(post);
 };
 
 export const deletePost = async (req, res) => {
   const { id } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(id))
-    return res.status(404).send(`No post with id: ${id}`);
-
-  await PostMessage.findByIdAndRemove(id);
-
-  res.json({ message: "Post deleted successfully." });
+  const post = await Posts.findByIdAndDelete(id);
+  if (!post) {
+    throw new NotFoundError(`no item with id: ${id}`);
+  }
+  res.json({ message: 'post deleted successfully' });
 };
 
 export const likePost = async (req, res) => {
-  const { id } = req.params;
+  const {
+    params: { id },
+    user: { userId },
+  } = req;
 
-  if (!mongoose.Types.ObjectId.isValid(id))
-    return res.status(404).send(`No post with id: ${id}`);
-
-  const post = await PostMessage.findById(id);
-
-  const updatedPost = await PostMessage.findByIdAndUpdate(
+  const post = await Posts.findById(id);
+  if (!post) {
+    throw new NotFoundError(`no post with id ${id}`);
+  }
+  const checkPost = post.likeCount.find((id) => id === userId);
+  if (checkPost) {
+    const postIndex = post.likeCount.indexOf(userId);
+    post.likeCount.splice(postIndex, 1);
+  } else {
+    post.likeCount.push(userId);
+  }
+  const likedPost = await Posts.findByIdAndUpdate(
     id,
-    { likeCount: post.likeCount + 1 },
+    { likeCount: post.likeCount },
     { new: true }
   );
-
-  res.json(updatedPost);
+  res.status(201).json(likedPost);
 };
 
-export default router;
+export const getPostBySearch = async (req, res) => {
+  const { searchQuery, tags } = req.query;
+  const title = new RegExp(searchQuery, 'i');
+  const post = await Posts.find({
+    $or: [{ title }, { tags: { $in: tags.split(',') } }],
+  });
+  res.status(200).json({ data: post });
+};
+
+export const commentPost = async (req, res) => {
+  const { id } = req.params;
+  const { value } = req.body;
+  const post = await Posts.findById(id);
+  post.comments.push(value);
+
+  const updatedPost = await Posts.findByIdAndUpdate(
+    id,
+    { comments: post.comments },
+    { new: 'true' }
+  );
+
+  res.status(200).json(updatedPost);
+};
